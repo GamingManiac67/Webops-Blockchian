@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Shadows+Into+Light&family=Urbanist:wght@300&display=swap" rel="stylesheet">
+
+    <title>API Display</title>
+    <link rel="stylesheet" href="style.css">
+
+
+</head>
+<body>
+
+    <h1 class="custom-text">API Display</h1>
+
+    <button id="toggle-dark-mode">Dark Mode</button> <!-- Added dark mode toggle button -->
+
+    <div class="container">
+        <!-- Boxes will be displayed here -->
+    </div>
+    <div class="parent-element">
+        <h2 class = "custom-text_3">Saranathan</h2>
+        <div class="social-icons-container">
+            <a href="mailto:ee22b043@smail.iitm.ac.in" target="_blank">
+                <img src="gmail.svg" alt="Your ">
+            </a>
+            <a href="https://www.instagram.com/saranathan_67/" target="_blank">
+                <img src="instagram.svg" alt="Your  Image">
+            </a>
+            <a href="https://www.linkedin.com/in/saranathan-d-8098a4260/" target="_blank">
+                <img src="linkedin.svg" alt="Your SVG mage">
+            </a>
+            <a href="https://twitter.com/sergio8mar" target="_blank">
+                <img src="twitterx.svg" alt="Yur SVG Image">
+            </a>
+            <a href="https://wa.me/9361163151" target="_blank" >
+                <img src="whatsapp.svg" alt="Yr SVG Image">
+            </a> 
+        </div>
+    </div>
+
+
+    <script>
+        let data = [];
+        let isQuote = [];
+
+        function fetchJokeData(box) {
+            fetch('https://official-joke-api.appspot.com/random_joke')
+                .then(response => response.json())
+                .then(jokeData => {
+                    const contentElement = box.querySelector('.box-front');
+                    contentElement.innerHTML = `
+                        <p class="text-capitalize">${jokeData.type}</p>
+                        <p>${jokeData.setup}</p>
+                        <p>${jokeData.punchline}</p>
+                    `;
+                    data.push(jokeData);
+                    isQuote.push(false);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function fetchQuoteData(box) {
+            fetch('https://api.quotable.io/random')
+                .then(response => response.json())
+                .then(quoteData => {
+                    const contentElement = box.querySelector('.box-back');
+                    contentElement.innerHTML = `
+                        <p>${quoteData.tags.join(', ')}</p>
+                        <p>${quoteData.content}</p>
+                        <p>${quoteData.author}</p>
+                    `;
+                    data.push(quoteData);
+                    isQuote.push(true);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function handleTap(box, index) {
+            const currentIndex = index % data.length;
+            const boxInner = box.querySelector('.box-inner');
+
+            if (isQuote[currentIndex]) {
+                boxInner.style.transform = 'rotateY(0deg)';
+                isQuote[currentIndex] = false;
+                box.classList.remove('quote-box')
+                box.classList.add('joke-box','transition');
+
+            } else {
+                boxInner.style.transform = 'rotateY(180deg)';
+                isQuote[currentIndex] = true; 
+                box.classList.remove('joke-box');
+                box.classList.add('quote-box','transition');
+            }
+        }
+
+        function createBox(index) {
+            const box = document.createElement('div');
+            const boxTypeClass = isQuote[index] ? 'quote-box' : 'joke-box'; // Determine the class based on content type
+            box.classList.add('box', 'transition', boxTypeClass);
+
+            const boxInner = document.createElement('div');
+            boxInner.classList.add('box-inner');
+
+            const boxFront = document.createElement('div');
+            boxFront.classList.add('box-front');
+            boxInner.appendChild(boxFront);
+
+            const boxBack = document.createElement('div');
+            boxBack.classList.add('box-back');
+            boxInner.appendChild(boxBack);
+
+            box.addEventListener('click', () => handleTap(box, index));
+            box.appendChild(boxInner);
+            return box;
+        }
+
+        function fetchDataAndGenerateBoxes() {
+            const container = document.querySelector('.container');
+
+            for (let i = 0; i < 6; i++) {
+                const box = createBox(i);
+                fetchJokeData(box);
+                fetchQuoteData(box);
+                container.appendChild(box);
+            }
+        }
+
+        fetchDataAndGenerateBoxes();
+        box = document.querySelector(".box")
+        document.getElementById('toggle-dark-mode').addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+            const boxes = document.querySelectorAll('.box'); // Select all boxes
+            boxes.forEach(box => {
+                box.classList.toggle('dark-box'); // Toggle the dark-box class for each box
+            });
+
+        const isDarkMode = document.body.classList.contains('dark-mode');
+        localStorage.setItem('dark-mode', isDarkMode);
+
+        // Update button text
+        const toggleButton = document.getElementById('toggle-dark-mode');
+        toggleButton.textContent = isDarkMode ? 'Light Mode' : 'Dark Mode';
+        });
+
+        // Check if user previously chose dark mode
+        const savedDarkMode = localStorage.getItem('dark-mode');
+        if (savedDarkMode === 'true') {
+            document.body.classList.add('dark-mode');
+            const boxes = document.querySelectorAll('.box'); // Select all boxes
+            boxes.forEach(box => {
+        box.classList.toggle('dark-box'); // Toggle the dark-box class for each box
+        });
+            document.getElementById('toggle-dark-mode').textContent = 'Light Mode';
+        }
+        
+    </script>
+
+</body>
+</html>
